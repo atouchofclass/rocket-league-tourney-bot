@@ -73,10 +73,11 @@ async def time_tracker(send_to_channel, tourney_times):
 def is_weekday():
     return datetime.now().weekday() < 4
 
-def tourney_announcement_text(time_string):
-    return '**Announcement!** :robot:' \
-        + "\nThere is an upcoming tournament at **%s**." % (time_string) \
-        + "\nIf you would like to participate, react with the tournament rank you are interested in playing."
+def tourney_announcement_text(tourney_time_obj):
+    return ':bell: **Announcement!** :bell:' \
+        + "\nThere is an upcoming tournament" + (' **(2nd Chance)**' if tourney_time_obj['second_chance'] else '') + " at **%s**." % (tourney_time_obj['time_label']) \
+        + "\nIf you would like to participate, react with the tournament rank you are interested in playing." \
+        + "\nReactions will close 5 minutes before tournamenets begin."
 
 def load_api_token(filename):
     with open('api_token.txt', 'r') as f:
