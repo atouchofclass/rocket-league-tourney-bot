@@ -1,4 +1,4 @@
-tourney_times_weekday = {
+tourney_notify_times_weekday = {
     '17:30': {
         'time_label': '6:00 PM EST',
         'second_chance': False
@@ -23,6 +23,12 @@ tourney_times_weekday = {
         'time_label': '12:15 PM EST',
         'second_chance': True
     },
+}
+
+reaction_notify_times_weekday = {
+    '23:55': {
+        'time_label': '12:00 AM EST'
+    }
 }
 
 tourney_times_weekend = {
