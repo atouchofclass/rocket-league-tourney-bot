@@ -4,12 +4,28 @@ class ActiveTourneyNotification:
 
     emoji_ranks = {
         'Bronze1_rank_icon': 'bronze',
-        'Silver1_rank_icon': 'silver'
+        'Silver1_rank_icon': 'silver',
+        'Gold1_rank_icon': 'gold',
+        'Platinum1_rank_icon': 'platinum',
+        'Diamond1_rank_icon': 'diamond',
+        'Champion1_rank_icon': 'champion',
+        'Grand_champion1_rank_icon': 'grand_champion',
+        'Supersonic_Legend_rank_icon': 'ssl'
     }
     ranks = ['bronze', 'silver', 'gold', 'platinum', 'diamond', 'champion', 'grand_champion', 'ssl']
 
     def __init__(self):
         self.registrations = {
+            'bronze': [],
+            'silver': [],
+            'gold': [],
+            'platinum': [],
+            'diamond': [],
+            'champion': [],
+            'grand_champion': [],
+            'ssl': []
+        }
+        self.teams = {
             'bronze': [],
             'silver': [],
             'gold': [],
@@ -34,3 +50,8 @@ class ActiveTourneyNotification:
                 if player.user_id == user_id:
                     self.registrations[self.emoji_ranks[reaction_emoji]].remove(player)
                     return
+
+    # Create teams
+    def create_teams(self):
+        # take first multiple of 3 & shuffle players per team
+        pass

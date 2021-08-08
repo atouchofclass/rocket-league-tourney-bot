@@ -8,14 +8,14 @@ import asyncio
 from datetime import datetime
 import discord
 
-from tourney_times import tourney_notify_times_weekday, reaction_notify_times_weekday
+from tourney_times import tourney_notify_times_weekday, reaction_notify_times_weekday, \
+    tourney_notify_times_weekend, reaction_notify_times_weekend
 from active_tourney_notification import ActiveTourneyNotification
 
 channel_id = 871224692177006602
 time_test = {'00:14': '6:00 PM EST', '23:52': '9:00 PM EST', '23:52': '12:00 AM EST'}
 channel = None
 
-# active_notification_msg_id = ''
 active_notification = ActiveTourneyNotification()
 
 client = discord.Client()
@@ -24,8 +24,8 @@ client = discord.Client()
 async def on_ready():
     channel = client.get_channel(channel_id)
     # TODO change to weekend
-    tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekday
-    reaction_notify_times = reaction_notify_times_weekday if is_weekday() else tourney_notify_times_weekday
+    tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
+    reaction_notify_times = reaction_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
 
     client.loop.create_task(time_tracker(channel, tourney_notify_times, reaction_notify_times))
 
@@ -72,19 +72,16 @@ async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_ti
             # await msg.add_reaction('<:Supersonic_Legend_rank_icon:853469921589198879>')
 
             cache_msg = discord.utils.get(client.cached_messages, id=msg.id)
-            # client.loop.create_task(on_reaction_add(channel, tourney_notify_times, reaction_notify_times))
-            # active_announcement_msg_id = msg.id
             # print(cache_msg.reactions)
 
         # check time to make reactions / tourney teams notification
-        if cur_time_hhmm == '22:42' or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
+        if cur_time_hhmm[:2] == '16' or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
             # time to notify channel
             print('[Reactions notification for %s]' % cur_time_hhmm)
             past_notification_times_today.append(cur_time_hhmm)
-            print(msg.reactions)
 
         # check time to clear daily notification times
-        if cur_time_hhmm == '00:00':
+        if cur_time_hhmm == '00:15':
             past_notification_times_today = []
             tourney_times = tourney_times_weekday if is_weekday() else tourney_times_weekend
 
