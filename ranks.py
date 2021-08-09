@@ -9,3 +9,8 @@ emoji_ranks = {
     'Grand_champion1_rank_icon': 'grand_champion',
     'Supersonic_Legend_rank_icon': 'ssl'
 }
+
+rank_emojis = {
+    'bronze': '<:Bronze1_rank_icon:853469916614885397>',
+    'silver': '<:Silver1_rank_icon:853469917219258418>'
+}

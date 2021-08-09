@@ -11,7 +11,7 @@ import discord
 from tourney_times import tourney_notify_times_weekday, reaction_notify_times_weekday, \
     tourney_notify_times_weekend, reaction_notify_times_weekend
 from active_tourney_notification import ActiveTourneyNotification
-from ranks import emoji_ranks
+from ranks import emoji_ranks, rank_emojis
 
 channel_id = 871224692177006602
 time_test = {'00:14': '6:00 PM EST', '23:52': '9:00 PM EST', '23:52': '12:00 AM EST'}
@@ -26,7 +26,7 @@ async def on_ready():
     channel = client.get_channel(channel_id)
     # TODO change to weekend
     tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
-    reaction_notify_times = reaction_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
+    reaction_notify_times = reaction_notify_times_weekday if is_weekday() else reaction_notify_times_weekend
 
     client.loop.create_task(time_tracker(channel, tourney_notify_times, reaction_notify_times))
 
@@ -49,15 +49,18 @@ async def on_message(message):
 async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_times):
     past_notification_times_today = []
     active_notification_local = active_notification
+    notify = True
+    notify_2 = True
 
     while True:
         cur_time_hhmm = datetime.now().strftime('%H:%M')
 
         # check time to make tourney notification
-        if cur_time_hhmm[:2] == '17' or cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
+        if (notify and cur_time_hhmm[:2] == '23') or cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
             # time to notify channel
             print('[Tourney notification for %s]' % cur_time_hhmm)
             past_notification_times_today.append(cur_time_hhmm)
+            notify = False
 
             # msg = await send_to_channel.send('There is an upcoming tournament at **%s**' % (tourney_times[cur_time_hhmm]))
             # print(tourney_notify_times['23:30'])
@@ -76,10 +79,15 @@ async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_ti
             # print(cache_msg.reactions)
 
         # check time to make reactions / tourney teams notification
-        if cur_time_hhmm[:2] == '16' or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
+        if (notify_2 and cur_time_hhmm == '23:06') or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
             # time to notify channel
             print('[Reactions notification for %s]' % cur_time_hhmm)
             past_notification_times_today.append(cur_time_hhmm)
+            notify_2 = False
+
+            active_notification_local.create_teams()
+
+            msg = await send_to_channel.send(reactions_annoucement_text(reaction_notify_times['23:55'])) # cur_time_hhmm
 
         # check time to clear daily notification times
         if cur_time_hhmm == '00:15':
@@ -133,10 +141,15 @@ def tourney_announcement_text(tourney_time_obj):
         + "\nReactions will close 5 minutes before tournaments begin."
 
 def reactions_annoucement_text(reactions_time_obj):
-    return ":bell: **Announcement!** :bell:" \
+    msg = ":bell: **Announcement!** :bell:" \
         + "\nThere are 5 minutes before the tournament at **%s**." % (reactions_time_obj['time_label']) \
-        + "\nThe teams have been formed as follows:" \
-        + "\n"
+        + "\nThe teams have been formed as follows:"
+    for rank in active_notification.teams:
+        if len(active_notification.teams[rank]) == 0: continue
+        msg += "\n%s **%s**:" % (rank_emojis[rank], rank.capitalize())
+        for t in range(len(active_notification.teams[rank])):
+            msg += "\n\t• %s" % (', '.join(map(str, active_notification.teams[rank][t])))
+    return msg
 
 def load_api_token(filename):
     with open('api_token.txt', 'r') as f:

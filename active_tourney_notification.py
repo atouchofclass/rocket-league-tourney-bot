@@ -1,3 +1,5 @@
+import random
+
 from ranks import emoji_ranks
 from player import Player
 
@@ -40,7 +42,13 @@ class ActiveTourneyNotification:
                     self.registrations[emoji_ranks[reaction_emoji]].remove(player)
                     return
 
-    # Create teams
+    # Create teams from registrations
     def create_teams(self):
         # take first multiple of 3 & shuffle players per team
-        pass
+        for rank in self.registrations:
+            if len(self.registrations[rank]) >= 3:
+                top_multiple_of_3 = len(self.registrations[rank]) - (len(self.registrations[rank]) % 3)
+                current_rank_players = self.registrations[rank][:top_multiple_of_3]
+                random.shuffle(current_rank_players)
+                while len(current_rank_players) > 0:
+                    self.teams[rank].append([current_rank_players.pop(), current_rank_players.pop(), current_rank_players.pop()])
