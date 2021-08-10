@@ -24,7 +24,7 @@ client = discord.Client()
 @client.event
 async def on_ready():
     channel = client.get_channel(channel_id)
-    # TODO change to weekend
+
     tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
     reaction_notify_times = reaction_notify_times_weekday if is_weekday() else reaction_notify_times_weekend
 
@@ -56,7 +56,7 @@ async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_ti
         cur_time_hhmm = datetime.now().strftime('%H:%M')
 
         # check time to make tourney notification
-        if (notify and cur_time_hhmm[:2] == '23') or cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
+        if (notify and cur_time_hhmm[:2] == '19') or cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
             # time to notify channel
             print('[Tourney notification for %s]' % cur_time_hhmm)
             past_notification_times_today.append(cur_time_hhmm)
@@ -79,20 +79,23 @@ async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_ti
             # print(cache_msg.reactions)
 
         # check time to make reactions / tourney teams notification
-        if (notify_2 and cur_time_hhmm == '23:06') or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
+        if (notify_2 and cur_time_hhmm == '19:21') or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
             # time to notify channel
             print('[Reactions notification for %s]' % cur_time_hhmm)
             past_notification_times_today.append(cur_time_hhmm)
             notify_2 = False
 
+            # active_notification_local.test_fill_registrants()
             active_notification_local.create_teams()
 
             msg = await send_to_channel.send(reactions_annoucement_text(reaction_notify_times['23:55'])) # cur_time_hhmm
+            await send_to_channel.send(leftover_registrants_announcement_text())
 
         # check time to clear daily notification times
         if cur_time_hhmm == '00:15':
             past_notification_times_today = []
-            tourney_times = tourney_times_weekday if is_weekday() else tourney_times_weekend
+            tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
+            reaction_notify_times = reaction_notify_times_weekday if is_weekday() else reaction_notify_times_weekend
 
         await asyncio.sleep(10)
 
@@ -135,21 +138,45 @@ def is_weekday():
     return datetime.now().weekday() < 4
 
 def tourney_announcement_text(tourney_time_obj):
-    return ":bell: **Announcement!** :bell:" \
+    return ":bell: __**Announcement!**__ :bell:" \
         + "\nThere is an upcoming tournament" + (' **(2nd Chance)**' if tourney_time_obj['second_chance'] else '') + " at **%s**." % (tourney_time_obj['time_label']) \
         + "\nIf you would like to participate, react with the tournament rank you are interested in playing." \
         + "\nReactions will close 5 minutes before tournaments begin."
 
 def reactions_annoucement_text(reactions_time_obj):
-    msg = ":bell: **Announcement!** :bell:" \
-        + "\nThere are 5 minutes before the tournament at **%s**." % (reactions_time_obj['time_label']) \
-        + "\nThe teams have been formed as follows:"
-    for rank in active_notification.teams:
-        if len(active_notification.teams[rank]) == 0: continue
-        msg += "\n%s **%s**:" % (rank_emojis[rank], rank.capitalize())
-        for t in range(len(active_notification.teams[rank])):
-            msg += "\n\t• %s" % (', '.join(map(str, active_notification.teams[rank][t])))
+    msg = ":bell: __**Announcement!**__ :bell:" \
+        + "\nThere are 5 minutes left before the tournament at **%s**." % (reactions_time_obj['time_label'])
+    
+    if active_notification.teams_count() > 0:
+        msg += "\nThe teams have been formed as follows:"
+        for rank in active_notification.teams:
+            if len(active_notification.teams[rank]) == 0: continue
+            msg += "\n%s **%s**:" % (rank_emojis[rank], rank.capitalize())
+            for t in range(len(active_notification.teams[rank])):
+                msg += "\n\t• %s" % (', '.join(map(lambda p: mention_user(p.user_id), active_notification.teams[rank][t])))
+    
     return msg
+
+def leftover_registrants_announcement_text():
+    msg = ''
+    if active_notification.there_are_leftover_registrants():
+        msg += '@everyone'
+    
+    for rank in active_notification.leftover_registrants:
+        if len(active_notification.leftover_registrants[rank]) == 2:
+            msg += "\n:warning: **%s** and **%s** are looking for a teammate for the **%s** tournament!" % \
+                (active_notification.leftover_registrants[rank][0].user_name,
+                active_notification.leftover_registrants[rank][1].user_name,
+                rank.capitalize())
+        if len(active_notification.leftover_registrants[rank]) == 1:
+            msg += "\n:warning: **%s** is looking for teammates for the **%s** tournament!" % \
+                (active_notification.leftover_registrants[rank][0].user_name,
+                rank.capitalize())
+
+    return msg
+
+def mention_user(user_id):
+    return '<@!%s>' % (user_id)
 
 def load_api_token(filename):
     with open('api_token.txt', 'r') as f:

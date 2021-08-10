@@ -9,8 +9,13 @@ emoji_ranks = {
     'Grand_champion1_rank_icon': 'grand_champion',
     'Supersonic_Legend_rank_icon': 'ssl'
 }
-
 rank_emojis = {
     'bronze': '<:Bronze1_rank_icon:853469916614885397>',
-    'silver': '<:Silver1_rank_icon:853469917219258418>'
+    'silver': '<:Silver1_rank_icon:853469917219258418>',
+    'gold': '<:Gold1_rank_icon:853469917432381450>',
+    'platinum': '<:Platinum1_rank_icon:853469917385588766>',
+    'diamond': '<:Diamond1_rank_icon:853469917189767191>',
+    'champion': '<:Champion1_rank_icon:853469916928671781>',
+    'grand_champion': '<:Grand_champion1_rank_icon:853469917197893702>',
+    'ssl': '<:Supersonic_Legend_rank_icon:853469921589198879>'
 }
