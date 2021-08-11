@@ -36,6 +36,7 @@ class ActiveTourneyNotification:
             'grand_champion': [],
             'ssl': []
         }
+        self.have_teams = set()
         self.message_id = ''
         self.accepting_registrations = True
 
@@ -43,44 +44,73 @@ class ActiveTourneyNotification:
     def add_player(self, reaction_emoji, user_id, user_name):
         if reaction_emoji in emoji_ranks:
             player = Player(user_id, user_name)
-            self.registrations[emoji_ranks[reaction_emoji]].append(player)
+            self.registrations[emoji_ranks[reaction_emoji]['id']].append(player)
 
     # Remove a player from the ranked registration list and return it
     def remove_player(self, user_id, reaction_emoji):
         if reaction_emoji in emoji_ranks:
-            for player in self.registrations[emoji_ranks[reaction_emoji]]:
+            for player in self.registrations[emoji_ranks[reaction_emoji]['id']]:
                 if player.user_id == user_id:
                     removed_player = player
-                    self.registrations[emoji_ranks[reaction_emoji]].remove(player)
+                    self.registrations[emoji_ranks[reaction_emoji]['id']].remove(player)
                     return removed_player
 
     # Create teams from registrations
     def create_teams(self):
         # take first multiple of 3 & shuffle players per team
+        for rank in reversed(self.registrations):
+            # filter by players who do not yet have a team
+            filtered_registrations = list(filter(lambda player: player.user_id not in self.have_teams, self.registrations[rank]))
+            reg_count = len(filtered_registrations)
+
+            # if reg_count == 1:
+            #     self.leftover_registrants[rank].append(self.registrations[rank][0])
+            # elif reg_count == 2:
+            #     self.leftover_registrants[rank].append(self.registrations[rank][0])
+            #     self.leftover_registrants[rank].append(self.registrations[rank][1])
+            # elif reg_count >= 3:
+            #     len_mod_3 = reg_count % 3
+
+            #     # Handle leftover players (will not be placed in teams)
+            #     if len_mod_3 == 2:
+            #         self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 2])
+            #         self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 1])
+            #     elif len_mod_3 == 1:
+            #         self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 1])
+
+            # Make random teams out of multiple of 3 players per rank
+            if reg_count >= 3:
+                top_multiple_of_3 = reg_count - (reg_count % 3)
+                current_rank_players = filtered_registrations[:top_multiple_of_3]
+                for player in current_rank_players:
+                    self.have_teams.add(player.user_id)
+                random.shuffle(current_rank_players)
+                while len(current_rank_players) > 0:
+                    self.teams[rank].append([current_rank_players.pop(), current_rank_players.pop(), current_rank_players.pop()])
+
+        # identify leftover players & add to leftover registrants
         for rank in self.registrations:
             reg_count = len(self.registrations[rank])
 
             if reg_count == 1:
-                self.leftover_registrants[rank].append(self.registrations[rank][0])
+                if not self.registrations[rank][0].user_id in self.have_teams:
+                    self.leftover_registrants[rank].append(self.registrations[rank][0])
             elif reg_count == 2:
-                self.leftover_registrants[rank].append(self.registrations[rank][0])
-                self.leftover_registrants[rank].append(self.registrations[rank][1])
+                if not self.registrations[rank][0].user_id in self.have_teams:
+                    self.leftover_registrants[rank].append(self.registrations[rank][0])
+                if not self.registrations[rank][1].user_id in self.have_teams:
+                    self.leftover_registrants[rank].append(self.registrations[rank][1])
             elif reg_count >= 3:
                 len_mod_3 = reg_count % 3
 
-                # Handle leftover players (will not be placed in teams)
                 if len_mod_3 == 2:
-                    self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 2])
-                    self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 1])
+                    if not self.registrations[rank][reg_count - 2].user_id in self.have_teams:
+                        self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 2])
+                    if not self.registrations[rank][reg_count - 1].user_id in self.have_teams:
+                        self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 1])
                 elif len_mod_3 == 1:
-                    self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 1])
-
-                # Make random teams out of multiple of 3 players per rank
-                top_multiple_of_3 = reg_count - len_mod_3
-                current_rank_players = self.registrations[rank][:top_multiple_of_3]
-                random.shuffle(current_rank_players)
-                while len(current_rank_players) > 0:
-                    self.teams[rank].append([current_rank_players.pop(), current_rank_players.pop(), current_rank_players.pop()])
+                    if not self.registrations[rank][reg_count - 1].user_id in self.have_teams:
+                        self.leftover_registrants[rank].append(self.registrations[rank][reg_count - 1])
 
     def teams_count(self):
         teams_count = 0
@@ -93,12 +123,12 @@ class ActiveTourneyNotification:
             if len(self.leftover_registrants[rank]) > 0: return True
 
     # Return a player object by its user_id if found in the registrations
-    def find_player_in_registrations(self, user_id):
-        for player in [player for rank_list in self.registrations.values() for player in rank_list]:
-            print(player.user_id, player.user_name, user_id)
-            if player.user_id == user_id:
-                return player
-        return None
+    # def find_player_in_registrations(self, user_id):
+    #     for player in [player for rank_list in self.registrations.values() for player in rank_list]:
+    #         print(player.user_id, player.user_name, user_id)
+    #         if player.user_id == user_id:
+    #             return player
+    #     return None
 
     def test_fill_registrations(self):
         self.registrations['bronze'].append('Player A')
@@ -123,4 +153,4 @@ class ActiveTourneyNotification:
 
     def test_add_reg(self):
         self.registrations['bronze'].append(Player(user_id=0, user_name='TestPlayerA'))
-        self.registrations['bronze'].append(Player(user_id=0, user_name='TestPlayerB'))
+        self.registrations['ssl'].append(Player(user_id=1, user_name='TestPlayerB'))
