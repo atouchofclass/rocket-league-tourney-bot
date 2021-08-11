@@ -37,6 +37,7 @@ class ActiveTourneyNotification:
             'ssl': []
         }
         self.message_id = ''
+        self.accepting_registrations = True
 
     # Add a player to the ranked registration list
     def add_player(self, reaction_emoji, user_id, user_name):
@@ -44,13 +45,14 @@ class ActiveTourneyNotification:
             player = Player(user_id, user_name)
             self.registrations[emoji_ranks[reaction_emoji]].append(player)
 
-    # Remove a player from the ranked registration list
+    # Remove a player from the ranked registration list and return it
     def remove_player(self, user_id, reaction_emoji):
         if reaction_emoji in emoji_ranks:
             for player in self.registrations[emoji_ranks[reaction_emoji]]:
                 if player.user_id == user_id:
+                    removed_player = player
                     self.registrations[emoji_ranks[reaction_emoji]].remove(player)
-                    return
+                    return removed_player
 
     # Create teams from registrations
     def create_teams(self):
@@ -90,6 +92,14 @@ class ActiveTourneyNotification:
         for rank in self.leftover_registrants:
             if len(self.leftover_registrants[rank]) > 0: return True
 
+    # Return a player object by its user_id if found in the registrations
+    def find_player_in_registrations(self, user_id):
+        for player in [player for rank_list in self.registrations.values() for player in rank_list]:
+            print(player.user_id, player.user_name, user_id)
+            if player.user_id == user_id:
+                return player
+        return None
+
     def test_fill_registrations(self):
         self.registrations['bronze'].append('Player A')
         self.registrations['bronze'].append('Player B')
@@ -110,3 +120,7 @@ class ActiveTourneyNotification:
         self.registrations['diamond'].append('Player E')
         self.registrations['diamond'].append('Player G')
         self.registrations['diamond'].append('Player H')
+
+    def test_add_reg(self):
+        self.registrations['bronze'].append(Player(user_id=0, user_name='TestPlayerA'))
+        self.registrations['bronze'].append(Player(user_id=0, user_name='TestPlayerB'))

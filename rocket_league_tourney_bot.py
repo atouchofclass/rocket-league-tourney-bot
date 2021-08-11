@@ -14,6 +14,7 @@ from active_tourney_notification import ActiveTourneyNotification
 from ranks import emoji_ranks, rank_emojis
 
 channel_id = 871224692177006602
+client_user_id = 871218479435489281
 time_test = {'00:14': '6:00 PM EST', '23:52': '9:00 PM EST', '23:52': '12:00 AM EST'}
 channel = None
 
@@ -41,7 +42,7 @@ async def on_message(message):
         reply = True
 
     elif msg_content == '!help':
-        pass
+        print(client.user.id)
 
     if reply: await message.channel.send(msg)
 
@@ -56,7 +57,7 @@ async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_ti
         cur_time_hhmm = datetime.now().strftime('%H:%M')
 
         # check time to make tourney notification
-        if (notify and cur_time_hhmm[:2] == '19') or cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
+        if (notify and cur_time_hhmm[:2] == '20') or cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
             # time to notify channel
             print('[Tourney notification for %s]' % cur_time_hhmm)
             past_notification_times_today.append(cur_time_hhmm)
@@ -79,13 +80,16 @@ async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_ti
             # print(cache_msg.reactions)
 
         # check time to make reactions / tourney teams notification
-        if (notify_2 and cur_time_hhmm == '19:21') or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
+        if (notify_2 and cur_time_hhmm == '20:04') or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
             # time to notify channel
             print('[Reactions notification for %s]' % cur_time_hhmm)
             past_notification_times_today.append(cur_time_hhmm)
+            active_notification_local.accepting_registrations = False
+
             notify_2 = False
 
             # active_notification_local.test_fill_registrants()
+            active_notification_local.test_add_reg()
             active_notification_local.create_teams()
 
             msg = await send_to_channel.send(reactions_annoucement_text(reaction_notify_times['23:55'])) # cur_time_hhmm
@@ -93,6 +97,7 @@ async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_ti
 
         # check time to clear daily notification times
         if cur_time_hhmm == '00:15':
+            active_notification_local = ActiveTourneyNotification()
             past_notification_times_today = []
             tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
             reaction_notify_times = reaction_notify_times_weekday if is_weekday() else reaction_notify_times_weekend
@@ -104,34 +109,40 @@ async def on_reaction_add(reaction, user):
     # ignore reaction made by bot user
     if user.bot: return
 
+    # ignore if not accepting registrations
+    if not active_notification.accepting_registrations: return
+
     # check if reaction is attached the original notification message by the tourney bot 
     reaction_emoji_name = str(reaction).split(':')[1]
     if reaction.message.id == active_notification.message_id:
         send_to_channel = client.get_channel(channel_id)
 
         # add player to registrations
-        active_notification.add_player(user_id=user.id, user_name=user.name, reaction_emoji=reaction_emoji_name)
+        user_name = user.nick if user.nick is not None else user.name
+        active_notification.add_player(user_id=user.id, user_name=user_name, reaction_emoji=reaction_emoji_name)
         print(active_notification.registrations)
 
         # send message to channel
-        msg = ":white_check_mark: **%s** is interested in playing the **%s** tournament!" % (user.name, emoji_ranks[reaction_emoji_name].capitalize())
+        msg = ":white_check_mark: **%s** is interested in playing the **%s** tournament!" % (user_name, emoji_ranks[reaction_emoji_name].capitalize())
         await send_to_channel.send(msg)
 
 @client.event
 async def on_raw_reaction_remove(event):
-    # TODO ignore bot's user id
+    # ignore reaction made by bot user
+    if event.user_id == client_user_id: return
 
+    # ignore if not accepting registrations
+    if not active_notification.accepting_registrations: return
+    
     # check if reaction is attached the original notification message by the tourney bot 
     if event.message_id == active_notification.message_id:
         send_to_channel = client.get_channel(channel_id)
 
         # remove player from registrations
-        active_notification.remove_player(user_id=event.user_id, reaction_emoji=event.emoji.name)
-        print(active_notification.registrations)
+        removed_player = active_notification.remove_player(user_id=event.user_id, reaction_emoji=event.emoji.name)
 
         # send message to channel
-        user = await client.fetch_user(event.user_id)
-        msg = ":no_entry_sign: **%s** is no longer interested in playing the **%s** tournament." % (user.name, emoji_ranks[event.emoji.name].capitalize())
+        msg = ":no_entry_sign: **%s** is no longer interested in playing the **%s** tournament." % (removed_player.user_name, emoji_ranks[event.emoji.name].capitalize())
         await send_to_channel.send(msg)
 
 def is_weekday():
