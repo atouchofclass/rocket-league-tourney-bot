@@ -4,7 +4,8 @@
     Copyright (c) 2021 atouchofclass
 '''
 
-from datetime import datetime
+from datetime import datetime, timedelta
+import json
 import discord
 from discord.ext import tasks
 
@@ -13,23 +14,23 @@ from tourney_times import tourney_notify_times_weekday, reaction_notify_times_we
 from active_tourney_notification import ActiveTourneyNotification
 from ranks import emoji_ranks, rank_emojis
 
-channel_id = 874839079995445278
-client_user_id = 871218479435489281
+# channel_id = 874839079995445278
+# client_user_id = 871218479435489281
 time_test = {'00:14': '6:00 PM EST', '23:52': '9:00 PM EST', '23:52': '12:00 AM EST'}
 channel = None
 
 active_notification = None
+past_notification_times_today = []
 
 client = discord.Client()
 
 @client.event
 async def on_ready():
-    channel = client.get_channel(channel_id)
+    channel = client.get_channel(config['channel_id'])
 
     tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
     reaction_notify_times = reaction_notify_times_weekday if is_weekday() else reaction_notify_times_weekend
 
-    # client.loop.create_task(time_tracker(channel, tourney_notify_times, reaction_notify_times))
     time_tracker.start(channel, tourney_notify_times, reaction_notify_times)
 
 # Bot controller
@@ -47,62 +48,49 @@ async def on_message(message):
 
     if reply: await message.channel.send(msg)
 
-# @client.event
 @tasks.loop(seconds=10)
-async def time_tracker(send_to_channel, tourney_notify_times, reaction_notify_times):
+async def time_tracker(channel, tourney_notify_times, reaction_notify_times):
     global active_notification
-    past_notification_times_today = []
-    notify = True
-    notify_2 = True
+    global past_notification_times_today
 
-    # while True:
-    cur_time_hhmm = datetime.now().strftime('%H:%M')
+    cur_time_hhmm = (datetime.now() + timedelta(hours=config['utc_time_correction'])).strftime('%H:%M')
 
     # check time to make tourney notification
-    if (notify and cur_time_hhmm == '22:49') or cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
-        print('here2')
+    if cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
         active_notification = ActiveTourneyNotification()
         
         # time to notify channel
         print('[%s] Tourney notification' % cur_time_hhmm)
         past_notification_times_today.append(cur_time_hhmm)
-        notify = False
 
-        # msg = await send_to_channel.send('There is an upcoming tournament at **%s**' % (tourney_times[cur_time_hhmm]))
-        # print(tourney_notify_times['23:30'])
-        msg = await send_to_channel.send(tourney_announcement_text(tourney_notify_times['23:30'])) # cur_time_hhmm
+        msg = await channel.send(tourney_announcement_text(tourney_notify_times[cur_time_hhmm]))
         active_notification.message_id = msg.id
-        await msg.add_reaction('<:Bronze1_rank_icon:853469916614885397>')
-        await msg.add_reaction('<:Silver1_rank_icon:853469917219258418>')
-        await msg.add_reaction('<:Gold1_rank_icon:853469917432381450>')
-        await msg.add_reaction('<:Platinum1_rank_icon:853469917385588766>')
-        await msg.add_reaction('<:Diamond1_rank_icon:853469917189767191>')
-        await msg.add_reaction('<:Champion1_rank_icon:853469916928671781>')
-        await msg.add_reaction('<:Grand_champion1_rank_icon:853469917197893702>')
-        await msg.add_reaction('<:Supersonic_Legend_rank_icon:853469921589198879>')
+        
+        for rank in rank_emojis:
+            await msg.add_reaction(rank_emojis[rank]['emoji'])
 
         # cache_msg = discord.utils.get(client.cached_messages, id=msg.id)
         # print(cache_msg.reactions)
 
     # check time to make reactions / tourney teams notification
-    if (notify_2 and cur_time_hhmm == '22:29') or cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
+    if cur_time_hhmm in reaction_notify_times and cur_time_hhmm not in past_notification_times_today:
         # time to notify channel
         print('[%s] Reactions notification' % cur_time_hhmm)
         past_notification_times_today.append(cur_time_hhmm)
         active_notification.accepting_registrations = False
 
-        notify_2 = False
-
+        # tests
         # active_notification.test_fill_registrants()
         # active_notification.test_add_reg()
+
         active_notification.create_teams()
 
-        msg = await send_to_channel.send(reactions_annoucement_text(reaction_notify_times['23:55'])) # cur_time_hhmm
+        msg = await channel.send(reactions_annoucement_text(reaction_notify_times[cur_time_hhmm]))
         if active_notification.there_are_leftover_registrants():
-            await send_to_channel.send(leftover_registrants_announcement_text())
+            await channel.send(leftover_registrants_announcement_text())
 
     # check time to clear daily notification times
-    if cur_time_hhmm == '22:28':
+    if cur_time_hhmm == '00:15':
         print('[%s] Clear daily data and update tourney times' % cur_time_hhmm)
         past_notification_times_today = []
         tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
@@ -125,7 +113,7 @@ async def on_reaction_add(reaction, user):
             # ignore extraneous emojis
             return
         
-        send_to_channel = client.get_channel(channel_id)
+        send_to_channel = client.get_channel(config['channel_id'])
 
         # add player to registrations
         user_name = user.nick if user.nick is not None else user.name
@@ -139,7 +127,7 @@ async def on_reaction_add(reaction, user):
 @client.event
 async def on_raw_reaction_remove(event):
     # ignore reaction made by bot user
-    if event.user_id == client_user_id: return
+    if event.user_id == config['client_user_id']: return
 
     # ignore if not accepting registrations
     if not active_notification.accepting_registrations: return
@@ -149,7 +137,7 @@ async def on_raw_reaction_remove(event):
     
     # check if reaction is attached the original notification message by the tourney bot 
     if event.message_id == active_notification.message_id:
-        send_to_channel = client.get_channel(channel_id)
+        send_to_channel = client.get_channel(config['channel_id'])
 
         # remove player from registrations
         removed_player = active_notification.remove_player(user_id=event.user_id, reaction_emoji=event.emoji.name)
@@ -203,12 +191,20 @@ def leftover_registrants_announcement_text():
 def mention(user_id):
     return '<@!%s>' % (user_id)
 
-def load_api_token(filename):
+def load_api_token():
     with open('api_token.txt', 'r') as f:
         return f.readlines()[0].strip()
 
+def load_config():
+    with open('config.json', 'r') as f:
+        config_data = json.load(f)
+        if 'utc_time_correction' not in config_data:
+            config_data['utc_time_correction'] = 0
+        return config_data
+
 # Entry
-api_token = load_api_token('api_token.txt')
-print('datetime.now(): ' + datetime.now().strftime('%H:%M'))
+config = load_config()
+api_token = load_api_token()
+print('datetime.now():', datetime.now().strftime('%H:%M'), ', utc_time_correction:', config['utc_time_correction'])
 
 client.run(api_token)
