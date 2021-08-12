@@ -20,7 +20,7 @@ tourney_notify_times_weekday = {
         'second_chance': False
     },
     '23:59': {
-        'time_label': '12:15 PM EST',
+        'time_label': '12:15 AM EST',
         'second_chance': True
     }
 }
@@ -47,7 +47,7 @@ reaction_notify_times_weekday = {
         'second_chance': False
     },
     '00:10': {
-        'time_label': '12:15 PM EST',
+        'time_label': '12:15 AM EST',
         'second_chance': True
     }
 }
@@ -90,7 +90,7 @@ tourney_notify_times_weekend = {
         'second_chance': False
     },
     '23:59': {
-        'time_label': '12:15 PM EST',
+        'time_label': '12:15 AM EST',
         'second_chance': True
     }
 }
@@ -133,7 +133,7 @@ reaction_notify_times_weekend = {
         'second_chance': False
     },
     '00:10': {
-        'time_label': '12:15 PM EST',
+        'time_label': '12:15 AM EST',
         'second_chance': True
     }
 }
