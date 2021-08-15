@@ -9,14 +9,12 @@ import json
 import discord
 from discord.ext import tasks
 
-from tourney_times import tourney_notify_times_weekday, reaction_notify_times_weekday, \
-    tourney_notify_times_weekend, reaction_notify_times_weekend
+from tourney_times import tourney_notify_times_season_4, reaction_notify_times_season_4
 from active_tourney_notification import ActiveTourneyNotification
 from ranks import emoji_ranks, rank_emojis
 
 # channel_id = 874839079995445278
 # client_user_id = 871218479435489281
-time_test = {'00:14': '6:00 PM EST', '23:52': '9:00 PM EST', '23:52': '12:00 AM EST'}
 channel = None
 
 active_notification = None
@@ -28,8 +26,8 @@ client = discord.Client()
 async def on_ready():
     channel = client.get_channel(config['channel_id'])
 
-    tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
-    reaction_notify_times = reaction_notify_times_weekday if is_weekday() else reaction_notify_times_weekend
+    tourney_notify_times = tourney_notify_times_season_4
+    reaction_notify_times = reaction_notify_times_season_4
 
     time_tracker.start(channel, tourney_notify_times, reaction_notify_times)
 
@@ -48,7 +46,7 @@ async def on_message(message):
 
     if reply: await message.channel.send(msg)
 
-@tasks.loop(seconds=10)
+@tasks.loop(seconds=15)
 async def time_tracker(channel, tourney_notify_times, reaction_notify_times):
     global active_notification
     global past_notification_times_today
@@ -152,7 +150,7 @@ def is_weekday():
 # Generate tourney announcement text
 def tourney_announcement_text(tourney_time_obj):
     return ":bell: __**Announcement!**__ :bell:" \
-        + "\nThere is an upcoming tournament" + (' **(2nd Chance)**' if tourney_time_obj['second_chance'] else '') + " at **%s**." % (tourney_time_obj['time_label']) \
+        + "\nThere is an upcoming **%s** tournament at **%s**." % (tourney_time_obj['tourney_name'], tourney_time_obj['time_label']) \
         + "\nIf you would like to participate, react with the tournament rank you are interested in playing." \
         + "\nReactions will close 5 minutes before tournaments begin."
 
