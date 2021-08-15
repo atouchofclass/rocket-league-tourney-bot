@@ -1,5 +1,5 @@
 '''
-    Rocket League Tourney Bot v0.0.1 (2021.08.02.0)
+    Rocket League Tourney Bot v1.0.0 (2021.08.14.0)
     A simple Discord bot for notifying users about upcoming Rocket League tournaments
     Copyright (c) 2021 atouchofclass
 '''
