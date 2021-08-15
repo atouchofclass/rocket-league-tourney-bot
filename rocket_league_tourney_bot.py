@@ -20,6 +20,13 @@ channel = None
 active_notification = None
 past_notification_times_today = []
 
+info_msg_text = "**Rocket League Tourney Bot v1.0.0** by atouchofclass" \
+    + "\nHow it works:" \
+    + "\n• __30 minutes__ before a scheduled tournament, the bot will send a message asking members to react with the rank they are interested in playing." \
+    + "\n• __15 minutes__ before a scheduled 2nd chance tournament, the bot will send a message asking members to react with the rank they are interested in playing." \
+    + "\n• __5 minutes__ before a scheduled tournament, the bot will create teams of players if there are enough reactions." \
+    + " The server will be notified if someone needs a teammate. If someone would like to join a team, they should message the other players in the <#general> channel."
+
 client = discord.Client()
 
 @client.event
@@ -41,11 +48,17 @@ async def on_message(message):
         msg = "Hello, {0.author.mention}!".format(message)
         reply = True
 
-    elif msg_content == '!help':
-        pass
+    elif msg_content == '!info':
+        msg = info_msg_text
+        reply = True
 
-    if reply: await message.channel.send(msg)
+    if reply:
+        try:
+            await message.channel.send(msg)
+        except discord.errors.Forbidden:
+            pass
 
+# Bot loop
 @tasks.loop(seconds=15)
 async def time_tracker(channel, tourney_notify_times, reaction_notify_times):
     global active_notification
@@ -144,9 +157,6 @@ async def on_raw_reaction_remove(event):
         msg = ":no_entry_sign: **%s** is no longer interested in playing the **%s** tournament." % (removed_player.user_name, emoji_ranks[event.emoji.name]['label'])
         await send_to_channel.send(msg)
 
-def is_weekday():
-    return datetime.now().weekday() < 4
-
 # Generate tourney announcement text
 def tourney_announcement_text(tourney_time_obj):
     return ":bell: __**Announcement!**__ :bell:" \
@@ -186,6 +196,9 @@ def leftover_registrants_announcement_text():
 
     return msg
 
+def is_weekday():
+    return datetime.now().weekday() < 4
+
 def mention(user_id):
     return '<@!%s>' % (user_id)
 
@@ -202,7 +215,11 @@ def load_config():
 
 # Entry
 config = load_config()
+if 'alt_text_channel_id' in config:
+    info_msg_text = info_msg_text.replace('<#general>', '<#%s>' % config['alt_text_channel_id'])
+
 api_token = load_api_token()
+
 print('datetime.now():', datetime.now().strftime('%H:%M'), ', utc_time_correction:', config['utc_time_correction'])
 
 client.run(api_token)
