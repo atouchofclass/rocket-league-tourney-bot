@@ -102,10 +102,8 @@ async def time_tracker(channel, tourney_notify_times, reaction_notify_times):
 
     # check time to clear daily notification times
     if cur_time_hhmm == '00:15':
-        print('[%s] Clear daily data and update tourney times' % cur_time_hhmm)
+        print('[%s] Clear daily notification times' % cur_time_hhmm)
         past_notification_times_today = []
-        tourney_notify_times = tourney_notify_times_weekday if is_weekday() else tourney_notify_times_weekend
-        reaction_notify_times = reaction_notify_times_weekday if is_weekday() else reaction_notify_times_weekend
 
 @client.event
 async def on_reaction_add(reaction, user):
