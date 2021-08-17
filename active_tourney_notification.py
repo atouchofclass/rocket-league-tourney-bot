@@ -58,7 +58,7 @@ class ActiveTourneyNotification:
     # Create teams from registrations
     def create_teams(self):
         # take first multiple of 3 & shuffle players per team
-        for rank in reversed(self.registrations):
+        for rank in reversed(list(self.registrations.keys())):
             # filter by players who do not yet have a team
             filtered_registrations = list(filter(lambda player: player.user_id not in self.have_teams, self.registrations[rank]))
             reg_count = len(filtered_registrations)
