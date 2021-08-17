@@ -44,11 +44,7 @@ async def on_message(message):
     msg_content = message.content
     reply = False
 
-    if msg_content == '!hello':
-        msg = "Hello, {0.author.mention}!".format(message)
-        reply = True
-
-    elif msg_content == '!info':
+    if msg_content == '!info':
         msg = info_msg_text
         reply = True
 
