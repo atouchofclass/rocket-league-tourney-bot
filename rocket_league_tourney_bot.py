@@ -187,6 +187,8 @@ def leftover_registrants_announcement_text():
             msg += "\n:warning: **%s** is looking for teammates for the **%s** tournament!" % \
                 (active_notification.leftover_registrants[rank][0].user_name,
                 rank_emojis[rank]['label'])
+    
+    msg += "\n:information_source: Please use the %s channel and voice channels to communicate with potential teammates." % (channel(config['alt_text_channel_id']))
 
     return msg
 
@@ -195,6 +197,9 @@ def is_weekday():
 
 def mention(user_id):
     return '<@!%s>' % (user_id)
+
+def channel(channel_id):
+    return '<#%s>' % (channel_id)
 
 def load_api_token():
     with open('api_token.txt', 'r') as f:
@@ -211,6 +216,8 @@ def load_config():
 config = load_config()
 if 'alt_text_channel_id' in config:
     info_msg_text = info_msg_text.replace('<#general>', '<#%s>' % config['alt_text_channel_id'])
+else:
+    config['alt_text_channel_id'] = '#general'
 
 api_token = load_api_token()
 
