@@ -64,7 +64,7 @@ async def time_tracker(channel, tourney_notify_times, reaction_notify_times):
 
     # check time to make tourney notification
     if cur_time_hhmm in tourney_notify_times and cur_time_hhmm not in past_notification_times_today:
-        active_notification = ActiveTourneyNotification()
+        active_notification = ActiveTourneyNotification(tourney_notify_times[cur_time_hhmm]['party_size'])
         
         # time to notify channel
         print('[%s] Tourney notification' % cur_time_hhmm)
@@ -184,7 +184,7 @@ def leftover_registrants_announcement_text():
                 active_notification.leftover_registrants[rank][1].user_name,
                 rank_emojis[rank]['label'])
         if len(active_notification.leftover_registrants[rank]) == 1:
-            msg += "\n:warning: **%s** is looking for teammates for the **%s** tournament!" % \
+            msg += "\n:warning: **%s** is looking for teammate(s) for the **%s** tournament!" % \
                 (active_notification.leftover_registrants[rank][0].user_name,
                 rank_emojis[rank]['label'])
     
