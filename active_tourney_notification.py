@@ -107,6 +107,11 @@ class ActiveTourneyNotification:
             teams_count += len(self.teams[rank])
         return teams_count
 
+    def there_are_registrations(self):
+        for rank in self.registrations:
+            if len(self.registrations[rank]) > 0: return True
+        return False
+
     def there_are_leftover_registrants(self):
         for rank in self.leftover_registrants:
             if len(self.leftover_registrants[rank]) > 0: return True

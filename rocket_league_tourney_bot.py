@@ -92,9 +92,10 @@ async def time_tracker(channel, tourney_notify_times, reaction_notify_times):
 
         active_notification.create_teams()
 
-        msg = await channel.send(reactions_annoucement_text(reaction_notify_times[cur_time_hhmm]))
-        if active_notification.there_are_leftover_registrants():
-            await channel.send(leftover_registrants_announcement_text())
+        if active_notification.there_are_registrations():
+            msg = await channel.send(reactions_annoucement_text(reaction_notify_times[cur_time_hhmm]))
+            if active_notification.there_are_leftover_registrants():
+                await channel.send(leftover_registrants_announcement_text())
 
     # check time to clear daily notification times
     if cur_time_hhmm == '00:15':
