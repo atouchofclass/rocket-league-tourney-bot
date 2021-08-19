@@ -1,5 +1,5 @@
 '''
-    Rocket League Tourney Bot v1.0.1 (2021.08.18.0)
+    Rocket League Tourney Bot v1.0.2 (2021.08.19.0)
     A simple Discord bot for notifying users about upcoming Rocket League tournaments
     Copyright (c) 2021 atouchofclass
 '''
@@ -20,7 +20,7 @@ channel = None
 active_notification = None
 past_notification_times_today = []
 
-info_msg_text = "**Rocket League Tourney Bot v1.0.1** by atouchofclass" \
+info_msg_text = "**Rocket League Tourney Bot v1.0.2** by atouchofclass" \
     + "\nHow it works:" \
     + "\n• __30 minutes__ before a scheduled tournament, the bot will send a message asking members to react with the rank they are interested in playing." \
     + "\n• __15 minutes__ before a scheduled 2nd chance tournament, the bot will send a message asking members to react with the rank they are interested in playing." \
