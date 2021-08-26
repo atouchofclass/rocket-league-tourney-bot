@@ -9,9 +9,9 @@ import json
 import discord
 from discord.ext import tasks
 
-from tourney_times import tourney_notify_times_season_4, reaction_notify_times_season_4
-from active_tourney_notification import ActiveTourneyNotification
-from ranks import emoji_ranks, rank_emojis
+from data.tourney_times import tourney_notify_times_season_4, reaction_notify_times_season_4
+from models.active_tourney_notification import ActiveTourneyNotification
+from data.ranks import emoji_ranks, rank_emojis
 
 # channel_id = 874839079995445278
 # client_user_id = 871218479435489281

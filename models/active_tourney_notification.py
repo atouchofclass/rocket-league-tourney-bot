@@ -1,7 +1,7 @@
 import random
 
-from ranks import emoji_ranks
-from player import Player
+from data.ranks import emoji_ranks
+from models.player import Player
 
 class ActiveTourneyNotification:
 
