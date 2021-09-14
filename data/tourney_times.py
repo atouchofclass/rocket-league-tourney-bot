@@ -1,5 +1,5 @@
 tourney_notify_times_season_4 = {
-    '15:30': {
+    '15:25': {
         'time_label': '4:00 PM EST',
         'tourney_name': '3v3 Extra Mode',
         'party_size': 3
@@ -9,7 +9,7 @@ tourney_notify_times_season_4 = {
         'tourney_name': '3v3 Extra Mode (2nd Chance)',
         'party_size': 3
     },
-    '17:30': {
+    '17:25': {
         'time_label': '6:00 PM EST',
         'tourney_name': '2v2 Soccar',
         'party_size': 2
@@ -19,7 +19,7 @@ tourney_notify_times_season_4 = {
         'tourney_name': '2v2 Soccar (2nd Chance)',
         'party_size': 2
     },
-    '19:30': {
+    '19:25': {
         'time_label': '8:00 PM EST',
         'tourney_name': '3v3 Soccar',
         'party_size': 3
@@ -29,7 +29,7 @@ tourney_notify_times_season_4 = {
         'tourney_name': '3v3 Soccar (2nd Chance)',
         'party_size': 3
     },
-    '21:30': {
+    '21:25': {
         'time_label': '10:00 PM EST',
         'tourney_name': '2v2 Soccar',
         'party_size': 2
@@ -39,7 +39,7 @@ tourney_notify_times_season_4 = {
         'tourney_name': '2v2 Soccar (2nd Chance)',
         'party_size': 2
     },
-    '23:30': {
+    '23:25': {
         'time_label': '12:00 AM EST',
         'tourney_name': '3v3 Soccar',
         'party_size': 3
@@ -52,7 +52,7 @@ tourney_notify_times_season_4 = {
 }
 
 reaction_notify_times_season_4 = {
-    '15:55': {
+    '15:50': {
         'time_label': '4:00 PM EST',
         'tourney_name': '3v3 Extra Mode',
         'party_size': 3
@@ -62,7 +62,7 @@ reaction_notify_times_season_4 = {
         'tourney_name': '3v3 Extra Mode (2nd Chance)',
         'party_size': 3
     },
-    '17:55': {
+    '17:50': {
         'time_label': '6:00 PM EST',
         'tourney_name': '2v2 Soccar',
         'party_size': 2
@@ -72,7 +72,7 @@ reaction_notify_times_season_4 = {
         'tourney_name': '2v2 Soccar (2nd Chance)',
         'party_size': 2
     },
-    '19:55': {
+    '19:50': {
         'time_label': '8:00 PM EST',
         'tourney_name': '3v3 Soccar',
         'party_size': 3
@@ -82,7 +82,7 @@ reaction_notify_times_season_4 = {
         'tourney_name': '3v3 Soccar (2nd Chance)',
         'party_size': 3
     },
-    '21:55': {
+    '21:50': {
         'time_label': '10:00 PM EST',
         'tourney_name': '2v2 Soccar',
         'party_size': 2
@@ -92,7 +92,7 @@ reaction_notify_times_season_4 = {
         'tourney_name': '2v2 Soccar (2nd Chance)',
         'party_size': 2
     },
-    '23:55': {
+    '23:50': {
         'time_label': '12:00 AM EST',
         'tourney_name': '3v3 Soccar',
         'party_size': 3

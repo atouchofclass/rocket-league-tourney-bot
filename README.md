@@ -6,6 +6,11 @@ A.k.a. "Slider"
 
 ## Version History
 
+### 1.0.3 (2021.09.14.0)
+
+- Shifted tourney times to send tourney notification 35 minutes before a 1st chance tourney
+- Shifted tourney times to send reaction notification 10 minutes before a 1st chance tourney
+
 ### 1.0.2 (2021.08.19.0)
 
 - Added support for teammaking in 2v2 tournaments with party size of 2
