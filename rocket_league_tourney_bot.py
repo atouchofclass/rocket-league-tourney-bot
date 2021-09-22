@@ -4,6 +4,8 @@
     Copyright (c) 2021 atouchofclass
 '''
 
+import os
+import sys
 from datetime import datetime, timedelta
 import json
 import discord
@@ -220,7 +222,10 @@ if 'alt_text_channel_id' in config:
 else:
     config['alt_text_channel_id'] = '#general'
 
-api_token = load_api_token()
+if len(sys.argv) > 1 and sys.argv[1] == '--use-token-from-env-var':
+    api_token = os.getenv('DISCORD_API_TOKEN_TOURNEY_BOT')
+else:
+    api_token = load_api_token()
 
 print('datetime.now():', datetime.now().strftime('%H:%M'), ', utc_time_correction:', config['utc_time_correction'])
 
