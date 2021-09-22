@@ -17,6 +17,7 @@ pipeline {
                 echo 'Deploying....'
                 sh "chmod +x ./start_pm2.sh"
                 sh "chmod +x ./stop_pm2.sh"
+                sh "./stop_pm2.sh || true"
                 sh "./start_pm2.sh"
             }
         }
