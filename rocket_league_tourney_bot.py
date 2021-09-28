@@ -15,8 +15,6 @@ from data.tourney_times import tourney_notify_times_season_4, reaction_notify_ti
 from models.active_tourney_notification import ActiveTourneyNotification
 from data.ranks import emoji_ranks, rank_emojis
 
-# channel_id = 874839079995445278
-# client_user_id = 871218479435489281
 channel = None
 
 active_notification = None
@@ -43,6 +41,7 @@ async def on_ready():
 # Bot controller
 @client.event
 async def on_message(message):
+    global active_notification
     msg_content = message.content
     reply = False
 
@@ -72,6 +71,7 @@ async def time_tracker(channel, tourney_notify_times, reaction_notify_times):
         print('[%s] Tourney notification' % cur_time_hhmm)
         past_notification_times_today.append(cur_time_hhmm)
 
+        # send tourney notification
         msg = await channel.send(tourney_announcement_text(tourney_notify_times[cur_time_hhmm]))
         active_notification.message_id = msg.id
         
@@ -95,9 +95,14 @@ async def time_tracker(channel, tourney_notify_times, reaction_notify_times):
         active_notification.create_teams()
 
         if active_notification.there_are_registrations():
+            # send reactions notification
             msg = await channel.send(reactions_annoucement_text(reaction_notify_times[cur_time_hhmm]))
             if active_notification.there_are_leftover_registrants():
                 await channel.send(leftover_registrants_announcement_text())
+        else:
+            # delete tourney notification message if there are no registrations
+            msg = await channel.fetch_message(active_notification.message_id)
+            await msg.delete()
 
     # check time to clear daily notification times
     if cur_time_hhmm == '00:15':
@@ -159,7 +164,7 @@ def tourney_announcement_text(tourney_time_obj):
     return ":bell: __**Announcement!**__ :bell:" \
         + "\nThere is an upcoming **%s** tournament at **%s**." % (tourney_time_obj['tourney_name'], tourney_time_obj['time_label']) \
         + "\nIf you would like to participate, react with the tournament rank you are interested in playing." \
-        + "\nReactions will close 5 minutes before tournaments begin."
+        + "\nReactions will close 10 minutes before tournaments begin. If there are no reactions by that time, this message will self-destruct."
 
 # Generate reactions / teams announcement text
 def reactions_annoucement_text(reactions_time_obj):
