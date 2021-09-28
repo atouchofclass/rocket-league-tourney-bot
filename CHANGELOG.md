@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4 (2021.09.27.0)
+- Introduced Jenkins pipeline via Jenkinsfile
+- Made tourney notification messages "self-destruct" if there are no tourney registrants at the time that reactions close
+
 ## 1.0.3 (2021.09.14.0)
 - Shifted tourney times to send tourney notification 35 minutes before a 1st chance tourney
 - Shifted tourney times to send reaction notification 10 minutes before a 1st chance tourney
